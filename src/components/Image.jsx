@@ -7,6 +7,7 @@ function Image() {
  const speed = 1;
  const [width, height] = [app.screen.width, app.screen.height];
  const tiltAngle = 50; // even only
+ const bound = [0, 29];
 
  const [rotation, setRotation] = useState(0);
  const [x, setX] = useState(width / 2);
@@ -33,15 +34,16 @@ function Image() {
  }
 
  function calculateNextFrame(diff, frame) {
-  const bound = [0, 29];
-  const res = frame + Math.round(diff / tiltAngle);
+  const calculated = diff / tiltAngle;
+  if (calculated > 29) return frame;
+  const res = frame + Math.round(calculated);
   console.log(diff, res);
   if (res < bound[0]) {
-   return bound[0];
+   return bound[1] + res;
   }
 
   if (res > bound[1]) {
-   return bound[1];
+   return bound[0] + res - bound[1];
   }
 
   return res;
@@ -69,10 +71,16 @@ function Image() {
 
  useEffect(() => {
   if (!isMoving) {
-   if (frame > frame.length / 2 && frame < frames.length - 2) {
-    interval.current = setTimeout(() => setFrame((prev) => prev + 2), 50);
-   } else if (frame > 1) {
-    interval.current = setTimeout(() => setFrame((prev) => prev - 2), 50);
+   if (frame > frames.length / 2) {
+    if (frame + 3 > frames.length) {
+     interval.current = setTimeout(() => setFrame(0), 100);
+     return;
+    }
+    interval.current = setTimeout(() => setFrame((prev) => prev + 2), 100);
+    return;
+   }
+   if (frame > 1) {
+    interval.current = setTimeout(() => setFrame((prev) => prev - 2), 100);
    }
   }
  }, [frame, frames.length, isMoving]);
@@ -90,9 +98,18 @@ function Image() {
   load();
  }, [app.loader]);
 
- useEffect(() => {});
+ useEffect(() => {
+  if (frame > bound[1]) {
+   setFrame(bound[1]);
+   return;
+  }
 
- if (frames.length === 0) {
+  if (frame < bound[0]) {
+   setFrame(bound[0]);
+  }
+ }, [bound, frame]);
+
+ if (frames.length === 0 || frame > bound[1] || frame < bound[0]) {
   return null;
  }
 
