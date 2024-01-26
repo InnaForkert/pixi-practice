@@ -17,7 +17,7 @@ function Image() {
  const moveXInterval = useRef(null);
  //  const moveYInterval = useRef(null);
 
- const bound = useMemo(() => [0, 29], []);
+ const bound = useMemo(() => [0, 20], []);
 
  function setAngle(diff) {
   if (Math.abs(diff) < 10) {
@@ -66,14 +66,14 @@ function Image() {
  //  }
 
  function slowlyMoveX(diffX) {
-  const maxSpeed = 4;
+  const maxSpeed = 2;
   clearInterval(moveXInterval.current);
   clearInterval(interval.current);
   setIsMoving(true);
 
   if (Math.abs(diffX) < maxSpeed) {
    setX((prev) => prev + diffX);
-   setIsMoving(false);
+   setTimeout(() => setIsMoving(false), 200);
    return;
   }
 
